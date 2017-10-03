@@ -194,17 +194,24 @@ h4 {
   opacity: 1;
   overflow: hidden;
   white-space: normal;
-     
+  transition: .5s;
 }
+
 
 
 .pic-to-drag {
      draggable: true;
-     /*TODO MAKE THIS CENTERED; MOVE DRAGGABLE TO JS?*/
      margin: 1em auto;
-     border: 0px dotted gray;
+
 }
 
+.pic-to-drag:hover {
+     /*filter: saturate(160%) hue-rotate(45deg);*/
+     /*-webkit-filter: saturate(160%) hue-rotate(45deg);*/
+     cursor: pointer;
+     filter: drop-shadow(3px 3px 3px #3c2f50);
+     transition: .5s;
+}
 
 .o-main-role-item img {
   max-height: 140px;
@@ -212,6 +219,7 @@ h4 {
   border-radius: 5px;
   overflow: hidden;
 }
+
 
 .o-main-role-item figcaption {
   margin-top: 0em;
@@ -356,6 +364,7 @@ button {
 
 button:hover {
     color: #FFF;
+    cursor: pointer;
 }
 
 button:active {
@@ -363,9 +372,7 @@ button:active {
     opacity: .3;
 }
 
-#rehash {
-     
-}
+
 
 /*Main - Content specific - Contact*/
 

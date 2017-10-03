@@ -31,11 +31,24 @@ function dragNDrop() {
      // When drag event starts, assign variable, set up to allow drag and drop
      document.querySelector(".pic-to-drag").addEventListener("dragstart", function(event) {
           draggedPic = event.target;
+          console.log(draggedPic);
+          console.log(event);
           event.dataTransfer.setData("text/uri-list", null);
           event.dataTransfer.setData("text/plain", null);
           event.dataTransfer.effectAllowed = "move";
      }, false);
-     
+
+     ////////////////TODO////////////////////
+     // Need to do touchstart, touchend, touchmove, touchcancel
+/*     document.querySelector(".pic-to-drag").addEventListener("touchstart", function(event) {
+          draggedPic = event.target;
+          console.log(draggedPic);
+          console.log(event);
+          event.dataTransfer.setData("text/uri-list", null);
+          event.dataTransfer.setData("text/plain", null);
+          event.dataTransfer.effectAllowed = "move";
+     }, false);
+*/
      // Add listeners for all the boxes that are drop zones
      dropZones = document.querySelectorAll(".drop-here");
      for (i = 0; i < dropZones.length; i++) {
@@ -46,6 +59,7 @@ function dragNDrop() {
                     event.preventDefault();
                }
           }, false);
+
 
           // onDragenter: change box color
           dropZones[i].addEventListener("dragenter", function(event) {

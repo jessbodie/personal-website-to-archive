@@ -1,208 +1,260 @@
 
-// Initial timer data
-var timeIdle = 0;
-var timeIdleBegin = 5;
-var timeIdleEnd = 120;
-var intervalID;
-var captionTimeID;
+// Caption data controller
+var dataController = (function() {
 
-// Pre-populated caption data
-var newCaption = [
-     "%Insert YOUR caption here.%",
-     "Come on, add something funny, YOU CAN DO IT!",
-     "HEY! Keep it PG-13!",
-     "All the cool kids are writing their own captions.",
-     "Hey, YOU, get in the game! Enter your own caption!",
-     "Seriously, I know how creative you are. Enter a caption, please."];
-
-// Add more preset strings to the array for ABOUT page
-if (document.querySelector("title").textContent.includes("About")) {
-     newCaption.push(
-          "If it's going to be that kind of party, I'll stick my thumb in the mashed potatoes!",
-          "Jelly beans in the dryer... again!",
-          "Happy St. Paddy's Day!",
-          "That tea was HOT!");
-} else if (document.querySelector("title").textContent.includes("Welcome")) {
-     // Add more preset strings to the array for HOME page
-     newCaption.push(
-          "Oh, look, dinner!",
-          "I'll give you my plastic bags when you pry (or take) it from my cold, dead hands!",
-          "A tree grows in Brooklyn... (really)");
-} else if (document.querySelector("title").textContent.includes("Sandbox")) {
-     // Add more preset strings to the array for SANDBOX page
-     newCaption.push(
-          "Introducing... the next Albert Einstein!",
-          "Hey, who turned out the lights?",
-          "Come out, come out wherever you are!");
-}
-
-// Var for checking if random is immediate duplicate
-var prevRandIndex = newCaption.length + 1;
-var curRandIndex;
-
-
-function init() {
+     // Pre-populated caption data
+     var newCaption = [
+          "%Insert YOUR caption here.%",
+          "Come on, add something funny, YOU CAN DO IT!",
+          "HEY! Keep it PG-13!",
+          "All the cool kids are writing their own captions.",
+          "Hey, YOU, get in the game! Enter your own caption!",
+          "Seriously, I know how creative you are. FEED ME CAPTIONS!"];
      
-     // Click Enter text area, capture caption
-     document.getElementById("change-caption").addEventListener("keypress", captureNewCaption);
+     // Add more preset strings to the array for ABOUT page
+     if (document.querySelector("title").textContent.includes("About")) {
+          newCaption.push(
+               "If it's going to be that kind of party, I'll stick my thumb in the mashed potatoes!",
+               "Jelly beans in the dryer... again!",
+               "Happy St. Paddy's Day!",
+               "That tea was HOT!");
+     } else if (document.querySelector("title").textContent.includes("Welcome")) {
+          // Add more preset strings to the array for HOME page
+          newCaption.push(
+               "Oh, look, dinner!",
+               "I'll give you my plastic bags when you pry (or take) it from my cold, dead hands!",
+               "A tree grows in Brooklyn... (really)");
+     } else if (document.querySelector("title").textContent.includes("Sandbox")) {
+          // Add more preset strings to the array for SANDBOX page
+          newCaption.push(
+               "Introducing... the next Albert Einstein!",
+               "Hey, who turned out the lights?",
+               "Come out, come out wherever you are!");
+     }
+     
+     var prevIndex = 0;
+     
+     return {
+          // Return array of captions
+          getData: function() {
+               return newCaption;
+          },
+          
+          // Return previous index used for caption aray
+          getPrevIndex: function() {
+               return prevIndex;
+          },
 
-     // Events that detect user input and reset idle timer
-     document.addEventListener("DOMContentLoaded", incrementTimer);
-     document.addEventListener("click", resetTimer);
-     document.addEventListener("scroll", resetTimer);
-     document.addEventListener("keydown", resetTimer);
-     document.addEventListener("touchmove", resetTimer);
-     // document.addEventListener("mousemove", resetTimer);
-     // document.addEventListener("pointermove", resetTimer);
-     document.getElementById("change-caption").addEventListener("focus", pauseTimer);
+     
+          // Random number generator
+          getRand: function(max, min, prev) {
+               do {
+                    var cur = parseInt(Math.random() * (max - min) + min);
+                    // Prevent case when first rand generated was same before while
+                    if (cur != prev) {
 
-     // delay with loading first caption to see fade in
-     window.setTimeout(loadCaption, 200);
-
-}
-
-
-// Increment timer each second
-function incrementTimer() {
-     intervalID = window.setInterval(function() {
-          timeIdle++;
-          // console.log(timeIdle);
-
-          // Change caption after some idle time, expire after too much idle time
-          if (timeIdle >= timeIdleBegin && timeIdle < timeIdleEnd) {
-               changeCaptionOnTimer(timeIdle);
-          } else if (timeIdle === timeIdleEnd) {
-               captionFadeIn();
+                         // Move the new random to the previous random
+                         prevIndex = cur;
+                         return cur;
+                    }
+               }
+               // Check to make sure new random number isn't same as old one
+               while (prev === cur);
+          },
+          
+          addNewCaption: function(caption) {
+               if (newCaption[0] === "%Insert YOUR caption here.%") {
+                    newCaption.splice(0, 1);
+               }
+               newCaption.push(caption);
+               return newCaption;
           }
-     }, 1000);
-}
+
+     };
+
+})();
 
 
-function pauseTimer() {
-     captionFadeIn();
-     window.clearInterval(intervalID);
-     console.log("paused");
-     document.getElementById("change-caption").addEventListener("blur", incrementTimer);
-}
-
-
-// Reset timer
-function resetTimer () {
-     timeIdle = 0;
-     window.clearTimeout(captionTimeID);
-}
-
-
-// First add fade in, then on timer fade out
-function captionFadeIn() {
-     window.clearTimeout(captionTimeID);
-     document.getElementById("change-caption").className += " fade";
-}
-
-function captionFadeOut() {
-     captionTimeID = window.setTimeout(function() {
-          document.getElementById("change-caption").classList.remove("fade");
-     }, 4000);
-}
-
-
-// Random number generator
-var randomNum = function(max, min, prev) {
-     // console.log("Inside function, previous is: " + prev);
-     do {
-          let cur = parseInt(Math.random() * (max - min) + min);
-          // console.log("returning from function, the current: " + cur);
-          return cur;
-     }
-     // Check to make sure new random number isn't same as old one
-     while (prev === cur);
-}
-
-
-// Select and display random caption
-var randomCaption = function() {
-     // console.log("To start, Previous random is: " + prevRandIndex);
-
-     curRandIndex = randomNum(newCaption.length, 0, prevRandIndex);
-     prevRandIndex = curRandIndex;
-     // console.log("Should print: Current random: " + curRandIndex);
-     // console.log("Now, the previous random is: " + prevRandIndex);
-
-     // Add, then remove fade caption style
-     captionFadeIn();
-     document.getElementById("change-caption").value = newCaption[curRandIndex];
-     captionFadeOut();
+var UIController = (function() {
      
-     return newCaption[curRandIndex];
-}
-
-// Upon first page load, show default caption
-function loadCaption() {
-     captionFadeIn();
-     document.getElementById("change-caption").value = newCaption[0];
-     captionFadeOut();
-}
-
-
-// Change caption when idle every 5 seconds until certain time
-function changeCaptionOnTimer(t) {
-     if ((t % 5) == 0) {
-          // Show random caption, including those added by user
-          randomCaption();
-     }
-}
-
-
-// User clicks enter from caption field, saves the entered caption to array
-function captureNewCaption () {
-    if (event.keyCode == 13) {
-        newCaption.push(document.getElementById("change-caption").value);
-        document.getElementById("change-caption").value = newCaption[newCaption.length-1];
-        document.getElementById("change-caption").blur();
-
-        // Show rehash button after user presses Enter
-        if (document.getElementById("rehash") == undefined) {
-             let timeoutIDBtn = window.setTimeout(showBtnRehash, 1000);
-             // TODO Make this transition
-        } else {
-             // Click on rehash button to show new caption from array
-             btnRehash();
-        }
-   }
-}
-
-
-// Show "Rehash" button
-function showBtnRehash() {
-     // Resize form for rehash button
-     document.getElementById("change-caption").className += " after-caption-change";
+     // Set pause variable to not paused
+     var isPaused = false;
      
-     // Show rehash button
-     document.getElementById("change-caption").insertAdjacentHTML("afterend", "<button type='button' id='rehash' class='fadein'>Rehash</button>");
+     return {
+     
+          // Show caption
+          showCaption: function(cap) {
+               document.getElementById("change-caption").value = cap;
+               document.getElementById("change-caption").className += ' fade';
+               return false;
+          },
+          
+          fadeCaption: function() {
+               document.getElementById("change-caption").classList.remove('fade');
+               document.getElementById("change-caption").classList.remove('new-cap-added');
+          },
+          
+          capAdded: function () {
+               document.getElementById("change-caption").className += ' new-cap-added';
+          },
+          
+          // Clear contents of caption
+          clearCaption: function() {
+               document.getElementById("change-caption").value = "";
+               return false;
+          },
+          
+          // Show Rehash button
+          showBtnRehash: function() {
+               // Decrease text area to 80%
+               document.getElementById("change-caption").className += " after-caption-change";
+               
+               // Add button with class, ID, text
+               btnRehash = document.createElement('button');
+               btnRehash.className = '';
+               btnRehash.id = 'rehash';
+               btnRehash.type = 'button';
+               var btnRehashText = document.createTextNode('Rehash');
+               btnRehash.appendChild(btnRehashText);
+               
+               // Place button as child of form / next to text area
+               var btnParent = document.getElementById("change-caption").parentNode;
+               btnParent.appendChild(btnRehash);
+               
+               return false;
+          }
+     };
+     
+})();
 
-     document.getElementById("rehash").className = "fadein";
+var controller = (function(dataCtrl, UICtrl){
+     
+     var intervalID;
+     
+     // Change caption after specified idle time
+     var changeCaptionOnTimer = function(maxLength, pauseTog) {
+          // Initial timer data in seconds
+          var timeIdle = 0;
+          window.clearInterval(intervalID);
 
-     // Calls event listener for clicking on rehash button and changing caption
-     btnRehash();
-}
+          if (!pauseTog) {
+               intervalID = window.setInterval(function() {
+                    // Increment each second
+                    timeIdle++;
+                    console.log(timeIdle);
+                    
+                    // Check if every 5th second
+                    if ((timeIdle % 5) == 0) {
+                         // Show new caption using rand index
+                         captionGen();
+                    }
+                    
+                    if (timeIdle === 4) {
+                         UICtrl.fadeCaption();
+                    }
+                    
+               }, 1000);
+          } else {
+               window.clearInterval(intervalID);
+          }
+     };
+          
+     // Reset timer
+     var resetTimer = function() {
+          window.clearInterval(intervalID);
+          timeIdle = 0;
+          changeCaptionOnTimer(dataCtrl.getData().length, false);
 
-function btnRehash() {
-     window.clearTimeout(captionTimeID);
-     document.getElementById("rehash").addEventListener("click", randomCaption);
-     timeIdle = -4;
-}
+     };
+     
+     // When user is focused on caption,
+     // Clear caption display and pause timer
+     var pauseTimer = function() {
 
+          // Reset pause toggle, clear caption, reset timerID
+          UICtrl.isPaused = true;
+          UICtrl.clearCaption();
+          window.clearInterval(intervalID);
+          console.log("paused");
+          
+          // Pause timer
+          changeCaptionOnTimer(dataCtrl.getData().length, true);
+          
+          // Restart auto-caption on blur
+          document.getElementById("change-caption").addEventListener('blur', function() {
+               changeCaptionOnTimer(dataCtrl.getData().length, false);
+          });
 
+     };
+     
 
-init();
+     // Show captions using random array index number as input
+     var captionGen = function() {
+          UICtrl.fadeCaption();
+          resetTimer();
+          
+          // Get array of captions
+          var captions = dataCtrl.getData();
 
+          // Get new random index
+          var newRand = dataCtrl.getRand(captions.length, 0, dataCtrl.getPrevIndex());
+          // Use random index number to show rand caption
+          UICtrl.showCaption(captions[newRand]);
+     };
+     
+     var captureNewCaption = function() {
+          // Get new caption and add to array
+          // Display this caption
+          var newCap = document.getElementById("change-caption").value;
+          if (newCap) {
+               dataCtrl.addNewCaption(newCap);
+               UICtrl.capAdded();
+               document.getElementById("change-caption").blur();
+          }
+ 
+          // Show rehash button after user presses Enter
+         if (document.getElementById("rehash") == undefined) {
+              UICtrl.showBtnRehash();
+              // Listen for click on Rehash button to generate new caption
+              document.getElementById("rehash").addEventListener("click", captionGen);
+         }
+         
+         changeCaptionOnTimer(dataCtrl.getData().length, false);
+          
+     };
 
+     var setupEventListeners = function() {
 
+          // Load captions on timer
+          document.addEventListener("DOMContentLoaded", function(){
+                    changeCaptionOnTimer(dataCtrl.getData().length, false);
+          });
+          
+          // Events that detect user input and reset idle timer
+          document.addEventListener("scroll", resetTimer);
+          document.addEventListener("touchmove", resetTimer);
+          document.addEventListener("mousemove", resetTimer);
+          document.addEventListener("pointermove", resetTimer);
 
-// TODO
-// Caption fades momentarily at timeIdleEnd
-// Is check for previous random working?
+          // When user clicks on caption, pause timer, clear caption
+          document.getElementById("change-caption").addEventListener('focus', pauseTimer);
+     
+          // On Enter, capture new caption
+          document.getElementById("change-caption").addEventListener('keypress', function(event) {
+               if (event.keyCode == 13) {
+                    captureNewCaption();
+               }
+          });
+     };
 
-function test () {
-     console.log("test");
-}
+     
+     return {
+          init: function() {
+               console.log("app started");
+               setupEventListeners();
+          }
+     };
+     
+})(dataController, UIController);
+
+controller.init();
